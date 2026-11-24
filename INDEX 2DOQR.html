@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fixer — Centro de Recomendaciones Técnicas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #4f46e5;
+      --accent-light: #818cf8;
+      --bg-primary: #020617;
+      --bg-card: #0f172a;
+      --bg-card-2: #1e293b;
+      --border: #1e293b;
+      --border-light: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: var(--bg-primary); color: var(--text-primary); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    .grid-bg {
+      background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .page { display: none; animation: fadeIn 0.4s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .btn-primary { background: var(--accent); color: white; padding: 10px 24px; border-radius: 10px; font-weight: 500; font-size: 14px; border: none; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-family: 'DM Sans', sans-serif; }
+    .btn-primary:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 8px 25px -4px rgba(79,70,229,0.4); }
+    .btn-outline { background: transparent; color: var(--text-primary); padding: 10px 24px; border-radius: 10px; font-weight: 500; font-size: 14px; border: 1px solid var(--border-light); cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-family: 'DM Sans', sans-serif; }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent-light); background: rgba(79,70,229,0.05); }
+    .tool-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+    .tool-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(79,70,229,0.08), transparent 70%); opacity: 0; transition: opacity 0.3s ease; }
+    .tool-card:hover { border-color: #4f46e5; transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(79,70,229,0.3); }
+    .tool-card:hover::before { opacity: 1; }
+    .tool-card-disabled { opacity: 0.4; cursor: default; }
+    .tool-card-disabled:hover { transform: none; box-shadow: none; border-color: var(--border); }
+    .nav-link { font-size: 14px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s ease; cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; }
+    .nav-link:hover { color: var(--text-primary); }
+    .img-slot { background: var(--bg-card-2); border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; position: relative; transition: all 0.2s ease; display: flex; flex-direction: column; }
+    .img-slot:hover { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(79,70,229,0.3); }
+    .img-slot img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 11px 11px 0 0; flex: 1; }
+    .img-slot figcaption { padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; background: var(--bg-card-2); border-top: 1px solid var(--border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .img-slot-empty { background: var(--bg-card-2); border: 1px dashed var(--border-light); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; gap: 10px; transition: all 0.2s ease; }
+    .img-slot-empty:hover { border-color: var(--accent); color: var(--accent-light); }
+    .rec-item { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-num { min-width: 28px; height: 28px; border-radius: 8px; background: rgba(79,70,229,0.15); border: 1px solid rgba(79,70,229,0.3); color: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; font-family: 'Syne', sans-serif; flex-shrink: 0; margin-top: 1px; }
+    .warn-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 500; margin-top: 10px; }
+    .danger-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #f87171; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 500; margin-top: 10px; }
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 28px 20px; margin-bottom: 16px; }
+    .section-subtitle { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 22px; display: flex; align-items: center; gap: 12px; }
+    .section-subtitle::after { content: ''; height: 1px; flex: 1; background: linear-gradient(to right, rgba(79,70,229,0.35), transparent); }
+    .cycle-card { background: linear-gradient(135deg, rgba(79,70,229,0.09) 0%, rgba(79,70,229,0.02) 100%); border: 1px solid rgba(79,70,229,0.2); border-radius: 16px; padding: 28px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: color 0.2s ease; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-family: 'DM Sans', sans-serif; }
+    .back-btn:hover { color: var(--text-primary); border-color: var(--border-light); }
+    .navbar { position: sticky; top: 0; z-index: 100; background: rgba(2,6,23,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    .hero-stat { padding: 18px 28px; }
+    .hero-stat + .hero-stat { border-left: 1px solid var(--border); }
+    .filter-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1px solid; }
+    @media (max-width: 768px) {
+      .hide-mobile { display: none !important; }
+      .hero-stat { padding: 14px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;">
+      <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="goHome()">
+        <div style="width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.01em;">FIXER</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:28px;" class="hide-mobile">
+        <button class="nav-link" onclick="goHome()">Inicio</button>
+        <button class="nav-link" onclick="showSection('hidrolavadoras')">Hidrolavadoras</button>
+        <button class="nav-link" onclick="showSection('aspiradoras')">Aspiradoras</button>
+        <button class="nav-link" onclick="showSection('compresores')">Compresores</button>
+        <button class="nav-link" onclick="showSection('rotomartillos')">Rotomartillos</button>
+        <button class="nav-link" onclick="showSection('demoledores')">Demoledores</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline" style="padding:7px 14px;font-size:12px;" class="hide-mobile">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Garantías
+        </a>
+        <button class="btn-primary" style="padding:8px 16px;font-size:13px;" onclick="goHome()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Inicio
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HOME ===== -->
+  <div id="page-home" class="page active">
+
+    <!-- Hero -->
+    <section style="position:relative;overflow:hidden;padding:88px 24px 72px;">
+      <div class="orb" style="width:520px;height:520px;background:rgba(79,70,229,0.11);top:-120px;left:-80px;"></div>
+      <div class="orb" style="width:320px;height:320px;background:rgba(99,102,241,0.07);bottom:-40px;right:80px;"></div>
+      <div class="grid-bg" style="position:absolute;inset:0;z-index:0;"></div>
+
+      <div style="max-width:860px;margin:0 auto;text-align:center;position:relative;z-index:1;">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(79,70,229,0.1);border:1px solid rgba(79,70,229,0.25);border-radius:9999px;padding:6px 18px;font-size:11px;font-weight:600;color:var(--accent-light);letter-spacing:0.08em;margin-bottom:36px;text-transform:uppercase;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--accent-light);display:inline-block;"></span>
+          Centro de Soporte Técnico — Fixer
+        </div>
+
+        <h1 style="font-size:clamp(38px,7vw,70px);font-weight:800;line-height:1.05;letter-spacing:-0.03em;margin-bottom:24px;">
+          Guía Técnica de<br/>
+          <span style="color:var(--accent-light);">Uso Correcto</span><br/>
+          de Herramientas
+        </h1>
+
+        <p style="font-size:17px;color:var(--text-secondary);max-width:520px;margin:0 auto 44px;line-height:1.75;font-weight:300;">
+          Recomendaciones técnicas esenciales para maximizar el rendimiento, garantizar la seguridad y prolongar la vida útil de cada equipo.
+        </p>
+
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn-primary" onclick="document.getElementById('grid-herramientas').scrollIntoView({behavior:'smooth'})">
+            Explorar Herramientas
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          </button>
+          <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Políticas de Garantía
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:inline-flex;margin-top:60px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;flex-wrap:wrap;">
+          <div class="hero-stat">
+            <div style="font-size:26px;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent-light);">5+</div>
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Líneas Activas</div>
+          </div>
+          <div class="hero-stat">
+            <div style="font-size:26px;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent-light);">50%</div>
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Ciclo de Descanso</div>
+          </div>
+          <div class="hero-stat">
+            <div style="font-size:26px;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent-light);">∞</div>
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Soporte Técnico</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid de herramientas -->
+    <section id="grid-herramientas" style="max-width:1280px;margin:0 auto;padding:48px 24px 96px;">
+      <div style="margin-bottom:44px;">
+        <p style="font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent-light);margin-bottom:12px;">LÍNEAS DE HERRAMIENTAS</p>
+        <h2 style="font-size:clamp(24px,4vw,34px);font-weight:700;letter-spacing:-0.02em;max-width:460px;line-height:1.2;">Selecciona tu equipo para ver las recomendaciones técnicas</h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;">
+
+        <!-- 01 Hidrolavadoras -->
+        <div class="tool-card" onclick="showSection('hidrolavadoras')">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(79,70,229,0.12);border:1px solid rgba(79,70,229,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+          </div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">01</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Hidrolavadoras</h3>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.65;">Alta presión hidráulica para limpieza industrial y doméstica.</p>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:22px;font-size:12px;color:var(--accent-light);font-weight:500;">Ver recomendaciones <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+
+        <!-- 02 Aspiradoras -->
+        <div class="tool-card" onclick="showSection('aspiradoras')">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"/><path d="M12 3v18"/></svg>
+          </div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">02</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Aspiradoras</h3>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.65;">Aspiración industrial en seco y húmedo con filtros especializados.</p>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:22px;font-size:12px;color:#2dd4bf;font-weight:500;">Ver recomendaciones <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+
+        <!-- 03 Compresores -->
+        <div class="tool-card" onclick="showSection('compresores')">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">03</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Compresores</h3>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.65;">Compresores de aire para herramientas neumáticas industriales.</p>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:22px;font-size:12px;color:#fbbf24;font-weight:500;">Ver recomendaciones <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+
+        <!-- 04 Rotomartillos -->
+        <div class="tool-card" onclick="showSection('rotomartillos')">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">04</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Rotomartillos</h3>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.65;">Perforación y cincelado de alta potencia en concreto y mampostería.</p>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:22px;font-size:12px;color:#f87171;font-weight:500;">Ver recomendaciones <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+
+        <!-- 05 Demoledores -->
+        <div class="tool-card" onclick="showSection('demoledores')">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">05</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Demoledores</h3>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.65;">Demolición especializada de alta intensidad en estructuras duras.</p>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:22px;font-size:12px;color:#c084fc;font-weight:500;">Ver recomendaciones <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+
+        <!-- 06-08 Próximamente -->
+        <div class="tool-card tool-card-disabled">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(71,85,105,0.2);border:1px solid rgba(71,85,105,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">06</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Próximamente</h3>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.65;">Nueva línea de herramientas en proceso de incorporación.</p>
+          <div style="display:inline-flex;margin-top:22px;padding:4px 10px;background:rgba(71,85,105,0.25);border-radius:6px;font-size:11px;color:#475569;font-weight:600;letter-spacing:0.04em;">EN DESARROLLO</div>
+        </div>
+        <div class="tool-card tool-card-disabled">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(71,85,105,0.2);border:1px solid rgba(71,85,105,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">07</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Próximamente</h3>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.65;">Nueva línea de herramientas en proceso de incorporación.</p>
+          <div style="display:inline-flex;margin-top:22px;padding:4px 10px;background:rgba(71,85,105,0.25);border-radius:6px;font-size:11px;color:#475569;font-weight:600;letter-spacing:0.04em;">EN DESARROLLO</div>
+        </div>
+        <div class="tool-card tool-card-disabled">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(71,85,105,0.2);border:1px solid rgba(71,85,105,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">08</p>
+          <h3 style="font-size:19px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;">Próximamente</h3>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.65;">Nueva línea de herramientas en proceso de incorporación.</p>
+          <div style="display:inline-flex;margin-top:22px;padding:4px 10px;background:rgba(71,85,105,0.25);border-radius:6px;font-size:11px;color:#475569;font-weight:600;letter-spacing:0.04em;">EN DESARROLLO</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer Home -->
+    <footer style="border-top:1px solid var(--border);padding:52px 24px 40px;">
+      <div style="max-width:1280px;margin:0 auto;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:40px;">
+          <div>
+            <div style="width:96px;height:48px;border:1px dashed var(--border-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:0.06em;margin-bottom:16px;">LOGO</div>
+            <p style="font-size:13px;color:var(--text-muted);max-width:220px;line-height:1.6;">Centro de Soporte Técnico — Herramientas Industriales Fixer</p>
+          </div>
+          <div>
+            <p style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;">POLÍTICAS DE GARANTÍA</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline" style="padding:10px 20px;font-size:13px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Política de Máquinas
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;opacity:0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+              <a href="https://fixer.com.co/CSC_POLITICAS_REPUESTOS.pdf" target="_blank" class="btn-outline" style="padding:10px 20px;font-size:13px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Política de Repuestos
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;opacity:0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);text-align:center;">
+          © 2025 Fixer — Centro de Soporte Técnico. Todos los derechos reservados.
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ===== TEMPLATE MACRO ===== -->
+  <!-- Reusable footer for detail pages -->
+
+  <!-- ===== HIDROLAVADORAS ===== -->
+  <div id="page-hidrolavadoras" class="page">
+    <div style="max-width:1100px;margin:0 auto;padding:40px 24px 80px;">
+
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:44px;">
+        <button class="back-btn" onclick="goHome()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Volver al inicio
+        </button>
+        <span style="color:var(--text-muted);font-size:13px;">/ Hidrolavadoras</span>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:44px;flex-wrap:wrap;">
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(79,70,229,0.12);border:1px solid rgba(79,70,229,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+        </div>
+        <div>
+          <p style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;font-weight:600;">LÍNEA 01</p>
+          <h1 style="font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-0.025em;line-height:1;margin-bottom:10px;">Hidrolavadoras</h1>
+          <p style="font-size:14px;color:var(--text-secondary);max-width:580px;line-height:1.7;">Equipos de alta presión hidráulica. El suministro de agua y la calidad eléctrica son determinantes para la vida útil de la bomba.</p>
+        </div>
+      </div>
+
+      <!-- Image Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:36px;">
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\PW2482.png" alt="Hidrolavadora Modelo A" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo A</span>';">
+          <figcaption>Modelo A</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\PW1770.png" alt="Hidrolavadora Modelo B" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo B</span>';">
+          <figcaption>Modelo B</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;border-color:rgba(79,70,229,0.35);">
+          <img src=".\imagenes\XPW5521K.png" alt="Hidrolavadora XPW5521K" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.style.borderColor='rgba(79,70,229,0.35)';this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'#818cf8\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span style=\'color:var(--accent-light);\'>XPW5521K</span>';">
+          <figcaption style="color:var(--accent-light);">XPW5521K</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\PW1565.png" alt="Hidrolavadora Modelo D" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo D</span>';">
+          <figcaption>Modelo D</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\PW2275.png" alt="Hidrolavadora Modelo E" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo E</span>';">
+          <figcaption>Modelo E</figcaption>
+        </figure>
+      </div>
+
+      <!-- RECOMENDACIONES GENERALES -->
+      <div class="section-card">
+        <p class="section-subtitle">Recomendaciones Generales</p>
+        <div class="rec-item">
+          <div class="rec-num">1</div>
+          <div style="flex:1;">
+            <p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">Este tipo de equipos requiere un suministro de agua con <strong style="color:var(--text-primary);font-weight:600;">presión y caudal adecuados</strong>, garantizando un flujo continuo durante la operación, con el fin de evitar cavitación, pérdida de rendimiento y posibles daños en el sistema hidráulico.</p>
+            <div class="warn-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              NO están diseñadas para succionar agua de un balde — EXCEPCIÓN: modelo XPW5521K
+            </div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num">2</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">El suministro eléctrico debe estar en <strong style="color:var(--text-primary);font-weight:600;">óptimas condiciones</strong> con un voltaje estable para garantizar el correcto funcionamiento del motor y evitar daños por fluctuaciones.</p></div>
+        </div>
+      </div>
+
+      <!-- RECOMENDACIONES ESPECÍFICAS -->
+      <div class="section-card">
+        <p class="section-subtitle">Recomendaciones Específicas</p>
+        <div class="rec-item">
+          <div class="rec-num">1</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">Se debe usar en <strong style="color:var(--text-primary);font-weight:600;">todo momento el filtro de cristal</strong> para proteger la bomba de partículas en suspensión que puedan deteriorar los sellos y componentes internos del sistema hidráulico.</p></div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num">2</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">Antes de encender el equipo, es indispensable <strong style="color:var(--text-primary);font-weight:600;">purgar el aire</strong> del sistema. Para ello, accione el gatillo o la manguera con el equipo apagado hasta verificar visualmente que el flujo de agua salga de manera continua y sin interrupciones. Sólo entonces encienda el equipo de forma segura.</p></div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num">3</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">Se recomienda <strong style="color:var(--text-primary);font-weight:600;">evitar el funcionamiento en seco</strong> o con suministro intermitente de agua, ya que esta condición puede generar sobrecalentamiento, desgaste prematuro de sellos y afectaciones internas en la bomba.</p></div>
+        </div>
+      </div>
+
+      <!-- CICLOS DE TRABAJO -->
+      <div class="cycle-card">
+        <p class="section-subtitle" style="color:var(--accent-light);">Ciclos de Trabajo</p>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:24px;">Toda herramienta debe operar bajo ciclos de trabajo controlados, contemplando periodos de descanso acordes al nivel de carga y exigencia aplicada. Como criterio general, se recomienda establecer <strong style="color:var(--text-primary);font-weight:600;">tiempos de reposo equivalentes al 50% del tiempo efectivo de operación</strong>, con el fin de evitar sobrecalentamientos, fatiga prematura de componentes y reducción de la vida útil del equipo.</p>
+        <div style="display:inline-flex;align-items:center;gap:14px;background:rgba(79,70,229,0.1);border:1px solid rgba(79,70,229,0.25);border-radius:12px;padding:16px 22px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>
+            <p style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:4px;">Ciclo de Trabajo Continuo</p>
+            <p style="font-size:18px;font-weight:800;font-family:'Syne',sans-serif;color:white;letter-spacing:-0.01em;">30 minutos max</p>
+             <p style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:4px;">Ciclo de descanso</p>
+            <p style="font-size:18px;font-weight:800;font-family:'Syne',sans-serif;color:white;letter-spacing:-0.01em;">15 minutos descanso</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:24px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Política de Máquinas
+      </a>
+      <a href="https://fixer.com.co/CSC_POLITICAS_REPUESTOS.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Política de Repuestos
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== ASPIRADORAS ===== -->
+  <div id="page-aspiradoras" class="page">
+    <div style="max-width:1100px;margin:0 auto;padding:40px 24px 80px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:44px;">
+        <button class="back-btn" onclick="goHome()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Volver al inicio</button>
+        <span style="color:var(--text-muted);font-size:13px;">/ Aspiradoras</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:44px;flex-wrap:wrap;">
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"/><path d="M12 3v18"/></svg>
+        </div>
+        <div>
+          <p style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;font-weight:600;">LÍNEA 02</p>
+          <h1 style="font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-0.025em;line-height:1;margin-bottom:10px;">Aspiradoras</h1>
+          <p style="font-size:14px;color:var(--text-secondary);max-width:580px;line-height:1.7;">Aspiración industrial en seco y húmedo. El uso del filtro correcto según el tipo de trabajo es fundamental.</p>
+        </div>
+      </div>
+      <!-- Image Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:36px;">
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\VC6555.png" alt="Aspiradora Modelo A" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo A</span>';">
+          <figcaption>Modelo A</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\VC5034.png" alt="Aspiradora Modelo B" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo B</span>';">
+          <figcaption>Modelo B</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\VC0535p.png" alt="Aspiradora Modelo C" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo C</span>';">
+          <figcaption>Modelo C</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\VC0115p.png" alt="Aspiradora Modelo D" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo D</span>';">
+          <figcaption>Modelo D</figcaption>
+        </figure>
+      </div>
+      <!-- GENERALES -->
+      <div class="section-card" style="border-color:rgba(20,184,166,0.12);">
+        <p class="section-subtitle" style="color:#2dd4bf;"><span style="color:#2dd4bf;">Recomendaciones Generales</span></p>
+        <div class="rec-item">
+          <div class="rec-num" style="background:rgba(20,184,166,0.1);border-color:rgba(20,184,166,0.25);color:#2dd4bf;">1</div>
+          <div style="flex:1;">
+            <p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">Estas herramientas funcionan para trabajo en <strong style="color:var(--text-primary);font-weight:600;">HÚMEDO</strong>. Todo trabajo que exceda la cantidad de agua para la cual la herramienta está preparada para aspirar <strong style="color:#f87171;font-weight:600;">genera una negación de garantía automáticamente.</strong></p>
+            <div class="danger-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Exceder la capacidad hídrica invalida la garantía del equipo
+            </div>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num" style="background:rgba(20,184,166,0.1);border-color:rgba(20,184,166,0.25);color:#2dd4bf;">2</div>
+          <div style="flex:1;">
+            <p style="font-size:14px;line-height:1.75;color:var(--text-secondary);margin-bottom:14px;">Se debe instalar un <strong style="color:var(--text-primary);font-weight:600;">filtro independiente</strong> según el tipo de trabajo a realizar:</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:150px;background:var(--bg-card-2);border:1px solid rgba(248,250,252,0.08);border-radius:10px;padding:16px;">
+                <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;">Trabajo en Seco</p>
+                <p style="font-size:15px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text-primary);">Filtro HEPA</p>
+              </div>
+              <div style="flex:1;min-width:150px;background:rgba(20,184,166,0.06);border:1px solid rgba(20,184,166,0.2);border-radius:10px;padding:16px;">
+                <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(45,212,191,0.6);margin-bottom:8px;">Trabajo en Húmedo</p>
+                <p style="font-size:15px;font-weight:700;font-family:'Syne',sans-serif;color:#2dd4bf;">Filtro de Espuma</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- CICLOS -->
+      <div class="cycle-card" style="background:linear-gradient(135deg,rgba(20,184,166,0.08),rgba(20,184,166,0.02));border-color:rgba(20,184,166,0.2);">
+        <p class="section-subtitle" style="color:#2dd4bf;">Ciclos de Trabajo</p>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:24px;">Toda herramienta debe operar bajo ciclos de trabajo controlados. Se recomienda establecer <strong style="color:var(--text-primary);font-weight:600;">tiempos de reposo equivalentes al 50% del tiempo efectivo de operación</strong>.</p>
+        <div style="display:inline-flex;align-items:center;gap:14px;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:12px;padding:16px 22px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>
+            <p style="font-size:11px;color:rgba(45,212,191,0.6);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:4px;">Ciclo de Trabajo Continuo</p>
+            <p style="font-size:18px;font-weight:800;font-family:'Syne',sans-serif;color:white;">## min max</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:24px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Máquinas</a>
+      <a href="https://fixer.com.co/CSC_POLITICAS_REPUESTOS.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Repuestos</a>
+    </div>
+  </div>
+
+  <!-- ===== COMPRESORES ===== -->
+  <div id="page-compresores" class="page">
+    <div style="max-width:1100px;margin:0 auto;padding:40px 24px 80px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:44px;">
+        <button class="back-btn" onclick="goHome()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Volver al inicio</button>
+        <span style="color:var(--text-muted);font-size:13px;">/ Compresores</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:44px;flex-wrap:wrap;">
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <div>
+          <p style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;font-weight:600;">LÍNEA 03</p>
+          <h1 style="font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-0.025em;line-height:1;margin-bottom:10px;">Compresores</h1>
+          <p style="font-size:14px;color:var(--text-secondary);max-width:580px;line-height:1.7;">Compresores de aire para aplicaciones neumáticas. El mantenimiento periódico garantiza rendimiento óptimo y seguridad operativa.</p>
+        </div>
+      </div>
+      <!-- Image Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:36px;">
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\CA10050.png" alt="Compresor Modelo A" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo A</span>';">
+          <figcaption>Modelo A</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\CA5035.png" alt="Compresor Modelo B" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo B</span>';">
+          <figcaption>Modelo B</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\CA3055s.png" alt="Compresor Modelo C" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo C</span>';">
+          <figcaption>Modelo C</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src=".\imagenes\CA2542D.png" alt="Compresor Modelo D" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo D</span>';">
+          <figcaption>Modelo D</figcaption>
+        </figure>
+      </div>
+      <!-- GENERALES -->
+      <div class="section-card" style="border-color:rgba(245,158,11,0.1);">
+        <p class="section-subtitle" style="color:#fbbf24;">Recomendaciones Generales</p>
+        <div class="rec-item">
+          <div class="rec-num" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);color:#fbbf24;">1</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">El equipo debe ser <strong style="color:var(--text-primary);font-weight:600;">drenado como mínimo 1 vez por semana</strong> para eliminar el condensado acumulado en el tanque y prevenir corrosión interna que comprometa la integridad estructural.</p></div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);color:#fbbf24;">2</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">El <strong style="color:var(--text-primary);font-weight:600;">transporte del equipo</strong> se debe realizar sin ningún fluido y con el tanque completamente vacío, para prevenir accidentes y garantizar la integridad estructural durante el traslado.</p></div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-num" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);color:#fbbf24;">3</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">SI es necesaria la conexion con EXTENSION, la misma no debe ser mas "DELGADA" al calibre del equipo.</p></div>
+        </div>
+        <div class="rec-item" style="opacity:0.4;">
+          <div class="rec-num" style="background:rgba(71,85,105,0.2);border-color:rgba(71,85,105,0.2);color:var(--text-muted);">#</div>
+          <div style="flex:1;"><p style="font-size:13px;color:var(--text-muted);font-style:italic;">Próximamente — información en proceso de actualización.</p></div>
+        </div>
+      </div>
+      <!-- ESPECÍFICAS -->
+      <div class="section-card" style="border-color:rgba(245,158,11,0.08);">
+        <p class="section-subtitle" style="color:#fbbf24;">Recomendaciones Específicas</p>
+        <div style="padding:16px 0;text-align:center;opacity:0.45;">
+          <div class="rec-item">
+          <div class="rec-num" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);color:#fbbf24;">1</div>
+          <div style="flex:1;"><p style="font-size:14px;line-height:1.75;color:var(--text-secondary);">El equipo debe ser <strong style="color:var(--text-primary);font-weight:600;">CFM (Caudal): Es lo más importante; tu compresor debe superar por un 50% los CFM que exige tu herramienta más potente para evitar que se detenga.</strong> para eliminar el condensado acumulado en el tanque y prevenir corrosión interna que comprometa la integridad estructural.</p></div>
+        </div>
+          <p style="font-size:13px;font-style:italic;">+ informacion proximamente</p>
+        </div>
+      </div>
+      <!-- CICLOS -->
+      <div class="cycle-card" style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.01));border-color:rgba(245,158,11,0.2);">
+        <p class="section-subtitle" style="color:#fbbf24;">Ciclos de Trabajo</p>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:24px;">Toda herramienta debe operar bajo ciclos de trabajo controlados. Se recomienda establecer <strong style="color:var(--text-primary);font-weight:600;">tiempos de reposo equivalentes al 50% del tiempo efectivo de operación</strong>.</p>
+        <div style="display:inline-flex;align-items:center;gap:14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px 22px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>
+            <p style="font-size:11px;color:rgba(251,191,36,0.6);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:4px;">Ciclo de Trabajo Continuo</p>
+            <p style="font-size:18px;font-weight:800;font-family:'Syne',sans-serif;color:white;">30 min max</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:24px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Máquinas</a>
+      <a href="https://fixer.com.co/CSC_POLITICAS_REPUESTOS.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Repuestos</a>
+    </div>
+  </div>
+
+  <!-- ===== ROTOMARTILLOS ===== -->
+  <div id="page-rotomartillos" class="page">
+    <div style="max-width:1100px;margin:0 auto;padding:40px 24px 80px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:44px;">
+        <button class="back-btn" onclick="goHome()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Volver al inicio</button>
+        <span style="color:var(--text-muted);font-size:13px;">/ Rotomartillos</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:44px;flex-wrap:wrap;">
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <div>
+          <p style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;font-weight:600;">LÍNEA 04</p>
+          <h1 style="font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-0.025em;line-height:1;margin-bottom:10px;">Rotomartillos</h1>
+          <p style="font-size:14px;color:var(--text-secondary);max-width:580px;line-height:1.7;">Perforación y cincelado de alta potencia. Diseñados para trabajo en concreto, mampostería y materiales duros.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:36px;">
+        <figure class="img-slot" style="height:155px;">
+          <img src="./imagenes/roto-a.jpg" alt="Rotomartillo Modelo A" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo A</span>';">
+          <figcaption>Modelo A</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src="./imagenes/roto-b.jpg" alt="Rotomartillo Modelo B" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo B</span>';">
+          <figcaption>Modelo B</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src="./imagenes/roto-c.jpg" alt="Rotomartillo Modelo C" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo C</span>';">
+          <figcaption>Modelo C</figcaption>
+        </figure>
+      </div>
+      <div class="section-card" style="border-color:rgba(239,68,68,0.1);">
+        <p class="section-subtitle" style="color:#f87171;">Recomendaciones Generales</p>
+        <div style="padding:16px 0;text-align:center;opacity:0.45;"><p style="font-size:13px;color:var(--text-muted);font-style:italic;">Información en proceso de actualización. Próximamente disponible.</p></div>
+      </div>
+      <div class="cycle-card" style="background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.01));border-color:rgba(239,68,68,0.2);">
+        <p class="section-subtitle" style="color:#f87171;">Ciclos de Trabajo</p>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:24px;">Toda herramienta debe operar bajo ciclos de trabajo controlados. Se recomienda establecer <strong style="color:var(--text-primary);font-weight:600;">tiempos de reposo equivalentes al 50% del tiempo efectivo de operación</strong>.</p>
+        <div style="display:inline-flex;align-items:center;gap:14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px 22px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>
+            <p style="font-size:11px;color:rgba(248,113,113,0.6);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:4px;">Ciclo de Trabajo Continuo</p>
+            <p style="font-size:18px;font-weight:800;font-family:'Syne',sans-serif;color:white;">## min max</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:24px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Máquinas</a>
+      <a href="https://fixer.com.co/CSC_POLITICAS_REPUESTOS.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Repuestos</a>
+    </div>
+  </div>
+
+  <!-- ===== DEMOLEDORES ===== -->
+  <div id="page-demoledores" class="page">
+    <div style="max-width:1100px;margin:0 auto;padding:40px 24px 80px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:44px;">
+        <button class="back-btn" onclick="goHome()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Volver al inicio</button>
+        <span style="color:var(--text-muted);font-size:13px;">/ Demoledores</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:44px;flex-wrap:wrap;">
+        <div style="width:60px;height:60px;border-radius:16px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div>
+          <p style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;font-weight:600;">LÍNEA 05</p>
+          <h1 style="font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-0.025em;line-height:1;margin-bottom:10px;">Demoledores</h1>
+          <p style="font-size:14px;color:var(--text-secondary);max-width:580px;line-height:1.7;">Demolición especializada de alta intensidad. Operación controlada para máximo rendimiento y seguridad del operario.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:36px;">
+        <figure class="img-slot" style="height:155px;">
+          <img src="./imagenes/demo-a.jpg" alt="Demoledor Modelo A" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo A</span>';">
+          <figcaption>Modelo A</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src="./imagenes/demo-b.jpg" alt="Demoledor Modelo B" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo B</span>';">
+          <figcaption>Modelo B</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src="./imagenes/demo-c.jpg" alt="Demoledor Modelo C" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo C</span>';">
+          <figcaption>Modelo C</figcaption>
+        </figure>
+        <figure class="img-slot" style="height:155px;">
+          <img src="./imagenes/demo-d.jpg" alt="Demoledor Modelo D" onerror="this.parentElement.classList.replace('img-slot','img-slot-empty');this.parentElement.innerHTML='<svg width=\'26\' height=\'26\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.4\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg><span>Modelo D</span>';">
+          <figcaption>Modelo D</figcaption>
+        </figure>
+      </div>
+      <div class="section-card" style="border-color:rgba(168,85,247,0.1);">
+        <p class="section-subtitle" style="color:#c084fc;">Recomendaciones Generales</p>
+        <div style="padding:16px 0;text-align:center;opacity:0.45;"><p style="font-size:13px;color:var(--text-muted);font-style:italic;">Información en proceso de actualización. Próximamente disponible.</p></div>
+      </div>
+      <div class="cycle-card" style="background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(168,85,247,0.01));border-color:rgba(168,85,247,0.2);">
+        <p class="section-subtitle" style="color:#c084fc;">Ciclos de Trabajo</p>
+        <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-bottom:24px;">Toda herramienta debe operar bajo ciclos de trabajo controlados. Se recomienda establecer <strong style="color:var(--text-primary);font-weight:600;">tiempos de reposo equivalentes al 50% del tiempo efectivo de operación</strong>.</p>
+        <div style="display:inline-flex;align-items:center;gap:14px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:16px 22px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>
+            <p style="font-size:11px;color:rgba(192,132,252,0.6);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:4px;">Ciclo de Trabajo Continuo</p>
+            <p style="font-size:18px;font-weight:800;font-family:'Syne',sans-serif;color:white;">## min max</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:24px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Máquinas</a>
+      <a href="https://fixer.com.co/CSC_POLITICAS_REPUESTOS.pdf" target="_blank" class="btn-outline" style="padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Política de Repuestos</a>
+    </div>
+  </div>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      var t = document.getElementById('page-' + id);
+      if (t) { t.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+    }
+    function goHome() {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-home').classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>

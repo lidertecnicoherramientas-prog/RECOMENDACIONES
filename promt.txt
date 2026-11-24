@@ -1,0 +1,111 @@
+Actúa como un Diseñador UX/UI Senior y Desarrollador Frontend experto. Necesito que crees el código para la página de  la idea es ejecutarlo en visual studio,[Una pagina donde se muestre las recomendaciones principales las cuales no son muy claras para los clientes en el uso de cada herramienta].
+Quiero una estética extremadamente profesional, limpia, moderna y de nivel "Premium/SaaS de Silicon Valley".
+Lineamientos de Diseño:
+
+Paleta de colores: Estilo modo [oscuro / claro]. Usa una base de [Slate-900 y Zinc-50] con un color de acento [Indigo-600] para botones y elementos clave (sigue la regla 60-30-10).
+Diseño y Layout: Usa un diseño de cuadrícula moderna (tipo Bento Grid si aplica) con espaciado generoso (padding y margins amplios) para dejar respirar el contenido. Nada de elementos amontonados.
+Estilo de componentes: Bordes ligeramente redondeados (rounded-xl), sombras muy sutiles (shadow-sm) y bordes finos para separar secciones (border-slate-800).
+
+Tipografía: Limpia y legible (sans-serif), jugando fuertemente con los pesos visuales (títulos grandes y en negrita, subtítulos ligeros y en gris intermedio).
+
+Secciones requeridas en el código:
+Navbar: Limpio, con logo, enlaces de navegación y un botón de llamada a la acción (CTA) resaltado.
+Hero Section: Un título de impacto, un subtítulo descriptivo, dos botones principales y un marcador de posición (placeholder) para una imagen o dashboard flotante.
+Sección de Características: Una cuadrícula de 3 o 4 tarjetas con iconos limpios.
+
+Por favor, genera el código completo usando HTML y Tailwind CSS en un solo archivo interactivo para poder visualizarlo en tu pestaña de Artifacts. Asegúrate de que sea 100% responsivo (móvil y escritorio).
+
+Consejos Clave para una Estética "Premium"
+"Usa fuentes tipográficas del sistema modernas": Dile que use clases como font-sans o que simule tipografías como Inter, SF Pro o Geist.
+"Evita colores puros": El negro puro (#000000) o el blanco puro (#FFFFFF) cansan la vista. Pídele usar grises muy oscuros (slate-950) o blancos rotos (zinc-50). Esto le da un look inmediato de "Apple".
+"Añade transiciones suaves": Pídele que los botones cambien de color suavemente al pasar el cursor (transition-all duration-300 ease-in-out).
+
+
+Necesito------- Una pagina donde se muestre las recomendaciones principales las cuales no son muy claras para los clientes en el uso de cada herramienta,  las secciones principales son(y la idea es que al dar click en cada sección se cambie a un sitio donde se mostrara la información exclusiva de esa linea de herramientas):
+1) HIDROLAVADORAS
+2) ASPIRADORAS
+3) COMPRESORES
+4) ROTOMARTILLOS
+5) DEMOLEDORES
+6) ...
+7) ...
+8) ...
+
+-------------------------------------------------------
+SECCION 1(Hidrolavadoras):
+Ordenar de manera estratégica sitios donde se ubicaran imágenes de diferentes modelos de la linea de productos
+
+primer Subtitulo "RECOMENDACIONES GENERALES"
+
+1.Este tipo de equipos requiere un suministro de agua con presión y caudal adecuados, garantizando un flujo continuo durante la operación, con el fin de evitar cavitación, pérdida de rendimiento y posibles daños en el sistema hidráulico.(NO ESTAN DISEÑADAS PARA SUCCIONAR AGUA DE UN BALDE A EXCEPCION DE LA   "XPW5521K")
+2. El suministro eléctrico debe estar en optimas condiciones con un voltaje estable.
+
+
+Segundo subtitulo "RECOMENDACIONES ESPECIFICAS"
+1. Se debe usar en todo momento el filtro de cristal.
+2. Antes de poner en funcionamiento el equipo, es indispensable purgar el aire contenido en el sistema. Para ello, se debe accionar el gatillo o la manguera con el equipo apagado hasta verificar visualmente que el flujo de agua salga de manera continua y sin interrupciones. Una vez realizado este procedimiento, el equipo puede ser encendido de forma segura.
+3. Se recomienda evitar el funcionamiento en seco o con suministro intermitente de agua, ya que esta condición puede generar sobrecalentamiento, desgaste prematuro de sellos y afectaciones internas en la bomba.
+
+tercer Subtitulo "CICLOS DE TRABAJO"
+Toda herramienta debe operar bajo ciclos de trabajo controlados, contemplando periodos de descanso acordes al nivel de carga y exigencia aplicada durante su funcionamiento. Como criterio general, se recomienda establecer tiempos de reposo equivalentes al 50% del tiempo efectivo de operación, con el fin de evitar sobrecalentamientos, fatiga prematura de componentes y reducción de la vida útil del equipo. El ciclo de trabajo continuo esta expresado como ## min max.
+
+SECCION 2(Aspiradoras)
+Ordenar de manera estratégica sitios donde se ubicaran imágenes de diferentes productos
+
+primer Subtitulo "RECOMENDACIONES GENERALES"
+1. Estas herramientas funcionan para "HUMEDO" todo trabajo el cual exceda la cantidad de agua a la cual la herramienta esta sometida a aspirar genera una negación de garantia automáticamente
+2. Se debe instalar un filtro independiente para el tipo de trabajo, para aspirar en seco se una el filtro HEPA y para trabajos en húmedo, filtro de espuma.
+3. 
+
+Segundo Subtitulo "CICLOS DE TRABAJO"
+Toda herramienta debe operar bajo ciclos de trabajo controlados, contemplando periodos de descanso acordes al nivel de carga y exigencia aplicada durante su funcionamiento. Como criterio general, se recomienda establecer tiempos de reposo equivalentes al 50% del tiempo efectivo de operación, con el fin de evitar sobrecalentamientos, fatiga prematura de componentes y reducción de la vida útil del equipo. El ciclo de trabajo continuo esta expresado como ## min max.
+
+SECCION 3(Compresores)
+Ordenar de manera estratégica sitios donde se ubicaran imágenes de diferentes productos
+
+primer Subtitulo "RECOMENDACIONES GENERALES"
+1.El equipo debe ser drenado como minimo 1 vez por semana
+2.El transporte del equipo se debe realizar sin ningún fluido y con el tanque vacio.
+3.
+
+Segundo subtitulo "RECOMENDACIONES ESPECIFICAS"
+1.
+2.
+3.
+
+tercer Subtitulo "CICLOS DE TRABAJO"
+Toda herramienta debe operar bajo ciclos de trabajo controlados, contemplando periodos de descanso acordes al nivel de carga y exigencia aplicada durante su funcionamiento. Como criterio general, se recomienda establecer tiempos de reposo equivalentes al 50% del tiempo efectivo de operación, con el fin de evitar sobrecalentamientos, fatiga prematura de componentes y reducción de la vida útil del equipo. El ciclo de trabajo continuo esta expresado como ## min max.
+
+SECCION 4(Rotomartillos)
+Ordenar de manera estratégica sitios donde se ubicaran imágenes de diferentes productos
+
+primer Subtitulo "RECOMENDACIONES GENERALES"
+1.
+2.
+3.
+
+Segundo Subtitulo "CICLOS DE TRABAJO"
+Toda herramienta debe operar bajo ciclos de trabajo controlados, contemplando periodos de descanso acordes al nivel de carga y exigencia aplicada durante su funcionamiento. Como criterio general, se recomienda establecer tiempos de reposo equivalentes al 50% del tiempo efectivo de operación, con el fin de evitar sobrecalentamientos, fatiga prematura de componentes y reducción de la vida útil del equipo. El ciclo de trabajo continuo esta expresado como ## min max.
+
+SECCION 5(Demoledores)
+Ordenar de manera estratégica sitios donde se ubicaran imágenes de diferentes productos
+
+primer Subtitulo "RECOMENDACIONES GENERALES"
+1. 
+2.
+3.
+
+Segundo Subtitulo "CICLOS DE TRABAJO"
+Toda herramienta debe operar bajo ciclos de trabajo controlados, contemplando periodos de descanso acordes al nivel de carga y exigencia aplicada durante su funcionamiento. Como criterio general, se recomienda establecer tiempos de reposo equivalentes al 50% del tiempo efectivo de operación, con el fin de evitar sobrecalentamientos, fatiga prematura de componentes y reducción de la vida útil del equipo. El ciclo de trabajo continuo esta expresado como ## min max.
+
+
+
+al final de la pagina, vincular estos 2 links, y dejar el espacio para un logo:
+LINK POLITICAS DE GARANTIA
+1. MAQUINAS: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://fixer.com.co/CSC_POLITICAS_MAQUINAS_.pdf
+
+2. REPUESTOS: chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://fixer.com.co/CSC_POLITICAS_REPUESTOS.pdf 
+
+
+
+(La idea es ir agregando cada vez mas información a esta pagina)
